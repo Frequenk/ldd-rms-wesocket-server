@@ -5,10 +5,26 @@ import {
 } from '@nestjs/websockets';
 import { of } from 'rxjs';
 import * as url from 'url';
+import { CacheService } from './cache.service';
+
+interface DishType {
+  id: number;
+  name: string;
+  img: string;
+  price: number;
+  dish_num: number;
+  dish_type_id: number;
+}
+
+interface PayloadType {
+  val: number;
+  dish: DishType;
+}
 
 @WebSocketGateway()
 export class EventsGateway {
   @WebSocketServer() server;
+  constructor(private cacheService: CacheService) {}
 
   private clientsArr: any[] = [];
 
@@ -18,15 +34,15 @@ export class EventsGateway {
 
   handleDisconnect(client: any) {}
 
-  @SubscribeMessage('addCart')
-  addCart(client: any, payload: any) {
+  @SubscribeMessage('shoppingCar')
+  async addCart(client: any, payload) {
     console.log(payload);
 
-    const roomid = url.parse(client.request.url, true).query
-      .roomid; /*获取房间号 获取桌号*/
-    client.join(roomid);
-    // this.server.to(roomid).emit('addCart','Server AddCart Ok');    //广播所有人包含自己
-
-    client.broadcast.to(roomid).emit('addCart', 'Server AddCart Ok'); //不包括自己
+    const tableid = url.parse(client.request.url, true).query
+      .tableid; /*获取房间号 获取桌号*/
+    client.join(tableid);
+    // this.server.to(tableid).emit('shoppingCar', payload); //广播所有人包含自己
+    await this.cacheService.set('key66', 'value66');
+    client.broadcast.to(tableid).emit('shoppingCar', payload); //不包括自己
   }
 }
