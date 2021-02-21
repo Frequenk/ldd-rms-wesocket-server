@@ -6,8 +6,8 @@ export class ArticleController {
   constructor(private newsService: NewsService) {}
 
   @Get()
-  index(): string {
-    return '这里是article的index6677';
+  index(): any {
+    return { data: '这里是article的index66776' };
   }
   @Get('all')
   all() {
